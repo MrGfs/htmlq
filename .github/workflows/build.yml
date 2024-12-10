@@ -1,47 +1,46 @@
-name: 构建 ARM32 二进制文件
+name: Build binaries
 
 on:
-  workflow_dispatch:
   release:
     types: [published]
 
 jobs:
-  build-arm32:
-    runs-on: ubuntu-latest
-
+  release:
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: Checkout 代码
-        uses: actions/checkout@v2
-
-      - name: 安装交叉编译工具链
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-
-      - name: 设置 Rust 交叉编译环境
-        run: |
-          rustup target add armv7-unknown-linux-gnueabihf
-          mkdir -p ~/.cargo
-          echo "[target.armv7-unknown-linux-gnueabihf]" >> ~/.cargo/config
-          echo "linker = 'arm-linux-gnueabihf-gcc'" >> ~/.cargo/config
-
-      - name: 缓存依赖项
-        uses: actions/cache@v2
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v2
         with:
           path: |
             ~/.cargo/bin/
-            ~/.cargo/registry/
-            ~/.cargo/git/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
-
-      - name: 构建 ARM32 发布版本
-        run: cargo build --release --target armv7-unknown-linux-gnueabihf
-
-      - name: 打包二进制文件
-        run: tar cfz htmlq-armv7-linux.tar.gz -C target/armv7-unknown-linux-gnueabihf/release .
-
-      - name: 发布到 GitHub Releases
+      - name: Build release
+        run: cargo build --release
+      - name: Archive as .tar.gz (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: tar cfz htmlq-x86_64-linux.tar.gz -C target/release htmlq
+      - name: Archive as .tar.gz (macOS)
+        if: matrix.os == 'macos-latest'
+        run: tar cfz htmlq-x86_64-darwin.tar.gz -C target/release htmlq
+      - name: Archive as .zip (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: 7z a -tzip -mm=Deflate htmlq-x86_64-windows.zip ./target/release/htmlq.exe
+      - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: htmlq-armv7-linux.tar.gz
+          files: |
+            htmlq*.tar.gz
+            htmlq*.zip
