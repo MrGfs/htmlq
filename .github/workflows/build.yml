@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-20.04-arm64, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -26,14 +26,27 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+      - name: Install cross-compilation toolchain (ARM64)
+        if: matrix.os == 'ubuntu-20.04-arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          rustup target add arm-unknown-linux-gnueabihf
+
+      - name: Build release
+        run: cargo build --release --target=${{ matrix.target }}
+        env:
+          # 设置交叉编译目标，仅在ARM64时设置
+          matrix:
+            target: ${{ matrix.os == 'ubuntu-20.04-arm64' && 'arm-unknown-linux-gnueabihf' || 'x86_64-unknown-linux-gnu' }}
       - name: Build release
         run: cargo build --release
       - name: Archive as .tar.gz (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04-arm64'
         run: tar cfz htmlq-x86_64-linux.tar.gz -C target/release htmlq
       - name: Archive as .tar.gz (macOS)
         if: matrix.os == 'macos-latest'
-        run: tar cfz htmlq-x86_64-darwin.tar.gz -C target/release htmlq
+        run: tar cfz htmlq-arm32-darwin.tar.gz -C target/release htmlq
       - name: Archive as .zip (Windows)
         if: matrix.os == 'windows-latest'
         shell: bash
