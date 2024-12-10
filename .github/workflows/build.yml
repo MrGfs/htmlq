@@ -38,15 +38,6 @@ jobs:
       - name: set Build (Linux)
         if: matrix.os == 'ubuntu-20.04-arm64'
         run: echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
-      - name: set Build  (macOS)
-        if: matrix.os == 'macos-latest'
-        run: echo "TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
-      - name: set Build  (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run:  echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
-      - name: set Build release
-        run: 
              cargo build --release --target=${{ matrix.target }}
       - name: Build release
         run: cargo build --release
