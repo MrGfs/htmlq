@@ -37,9 +37,11 @@ jobs:
         run: 
              if [ "${{ matrix.os }}" = "ubuntu-20.04-arm64" ]; then
               echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
-             else
+            elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+              echo "TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
+            else
               echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
-             fi
+            fi
       - name: Build release
         run: 
              cargo build --release --target=${{ matrix.target }}
