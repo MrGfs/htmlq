@@ -34,14 +34,14 @@ jobs:
           rustup target add arm-unknown-linux-gnueabihf
 
       - name: Build release
-        run: 
-             if [ "${{ matrix.os }}" = "ubuntu-20.04-arm64" ]; then
-              echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
-            elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-              echo "TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
-            else
-              echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
-            fi
+        run:
+          if [ "${{ matrix.os }}" = "ubuntu-20.04-arm64" ]; then
+             echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
+          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+             echo "TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
+          else
+            echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
+          fi
       - name: Build release
         run: 
              cargo build --release --target=${{ matrix.target }}
