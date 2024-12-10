@@ -40,6 +40,7 @@ jobs:
         run: echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
              cargo build --release --target=${{ matrix.target }}
       - name: Build release
+        if: matrix.os != 'ubuntu-20.04-arm64'
         run: cargo build --release
       - name: Archive as .tar.gz (Linux)
         if: matrix.os == 'ubuntu-20.04-arm64'
