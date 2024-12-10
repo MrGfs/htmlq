@@ -36,9 +36,12 @@ jobs:
       - name: Build release
         run: cargo build --release --target=${{ matrix.target }}
         env:
-          # 设置交叉编译目标，仅在ARM64时设置
-          matrix:
-            target: ${{ matrix.os == 'ubuntu-20.04-arm64' && 'arm-unknown-linux-gnueabihf' || 'x86_64-unknown-linux-gnu' }}
+            run: |
+             if [ "${{ matrix.os }}" = "ubuntu-20.04-arm64" ]; then
+              echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
+             else
+              echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
+             fi
       - name: Build release
         run: cargo build --release
       - name: Archive as .tar.gz (Linux)
