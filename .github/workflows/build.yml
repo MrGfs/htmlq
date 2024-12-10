@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04-arm64, macos-latest, windows-latest]
+        os: [ubuntu-22.04-arm64, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -28,7 +28,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
       - name: Install cross-compilation toolchain (ARM64)
-        if: matrix.os == 'ubuntu-20.04-arm64'
+        if: matrix.os == 'ubuntu-22.04-arm64'
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
@@ -36,14 +36,14 @@ jobs:
 
       
       - name: set Build (Linux)
-        if: matrix.os == 'ubuntu-20.04-arm64'
+        if: matrix.os == 'ubuntu-22.04-arm64'
         run: echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
              cargo build --release --target=${{ matrix.target }}
       - name: Build release
-        if: matrix.os != 'ubuntu-20.04-arm64'
+        if: matrix.os != 'ubuntu-22.04-arm64'
         run: cargo build --release
       - name: Archive as .tar.gz (Linux)
-        if: matrix.os == 'ubuntu-20.04-arm64'
+        if: matrix.os == 'ubuntu-22.04-arm64'
         run: tar cfz htmlq-x86_64-linux.tar.gz -C target/release htmlq
       - name: Archive as .tar.gz (macOS)
         if: matrix.os == 'macos-latest'
