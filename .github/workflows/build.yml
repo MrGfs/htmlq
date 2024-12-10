@@ -1,6 +1,7 @@
 name: Build binaries
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -33,16 +34,18 @@ jobs:
           sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
           rustup target add arm-unknown-linux-gnueabihf
 
-      - name: Build release
-        run:
-          if [ "${{ matrix.os }}" = "ubuntu-20.04-arm64" ]; then
-             echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-             echo "TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
-          else
-            echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
-          fi
-      - name: Build release
+      
+      - name: set Build (Linux)
+        if: matrix.os == 'ubuntu-20.04-arm64'
+        run: echo "TARGET=arm-unknown-linux-gnueabihf" >> $GITHUB_ENV
+      - name: set Build  (macOS)
+        if: matrix.os == 'macos-latest'
+        run: echo "TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
+      - name: set Build  (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run:  echo "TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
+      - name: set Build release
         run: 
              cargo build --release --target=${{ matrix.target }}
       - name: Build release
